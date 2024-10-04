@@ -18,8 +18,11 @@ Visualization:
 We will visualize the data and model outputs using techniques such as:
 
 Heatmaps to highlight regions where the model detects cancerous cells.
+
 t-SNE plots for feature clustering.
+
 ROC curves to assess classification performance.
+
 Test Plan:
 We will split the data into 80% for training and 20% for testing, ensuring that the model generalizes well across unseen data. We will also use cross-validation to optimize hyperparameters and prevent overfitting.
 
