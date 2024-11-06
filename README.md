@@ -1,3 +1,5 @@
+https://youtu.be/7-hmqENZnfU
+
 # Midterm Report
 
 **Preliminary Visualizations of Data**
