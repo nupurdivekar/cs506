@@ -266,7 +266,6 @@ Download the model file from this link:
 ```bash
 https://drive.google.com/file/d/1MCeY5EMv3xC6g4uvenP8JB1pcfAhvhhA/view
 ```
-Rename the downloaded file to breast_cancer_cnn_model (1).keras and place it in: Copyapi/models/
 
 Alternatively, you can run:
 ```bash
