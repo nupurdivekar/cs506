@@ -114,8 +114,11 @@ The current CNN model outperformed earlier scratch-built architectures and ensem
 ### Attempt 5: MobileNetV2 + Ensemble
 
 What We Did: MobileNetV2 was employed as a feature extractor. Features were flattened and passed to ensemble classifiers, including XGBoost, LightGBM, and CatBoost. A soft voting mechanism averaged the predictions from these classifiers to generate final outputs.  
+
 Rationale: The ensemble approach aimed to leverage the strengths of different classifiers, each learning diverse decision boundaries. MobileNetV2’s lightweight architecture provided efficient feature extraction.  
+
 Result: The MobileNetV2 + Ensemble approach achieved ~81% validation accuracy. While it outperformed earlier Random Forest-based methods, it fell short of the fine-tuned EfficientNetB3. This highlighted the importance of end-to-end optimization in tasks requiring nuanced feature adaptation.  
+
 Key Takeaway: Ensemble models with MobileNetV2 features offered robustness but lacked the adaptability of end-to-end fine-tuning. This experiment reinforced the need for domain-specific refinement in pretrained networks.  
 
 ### Summary of Model Tuning
