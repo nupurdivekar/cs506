@@ -142,8 +142,10 @@ EfficientNetB3 was selected as the final model due to its state-of-the-art archi
 ## Comparing Results
 
 The two graphs provide a comprehensive comparison of model performance across various architectures. The first graph highlights validation accuracy, showcasing EfficientNetB3 (Fine-Tuned) as the best-performing model with the highest accuracy, followed closely by EfficientNetB3 + Random Forest. Simpler models like VGG16 + Random Forest and Simple CNN fall behind, emphasizing the advantage of using advanced architectures and transfer learning. The second graph delves deeper, comparing precision, recall, and F1-scores across models. Again, EfficientNetB3 (Fine-Tuned) demonstrates a balanced and superior performance in all metrics, indicating its reliability for robust classification tasks. The comparison reinforces the value of state-of-the-art models like EfficientNet in achieving high accuracy and consistent performance across critical evaluation metrics.
+![output](https://github.com/user-attachments/assets/901408c5-2850-469f-918f-f717192eb135)
 
----
+![3d6bc6b9-e9cc-42fd-9f73-bf67c9b26576](https://github.com/user-attachments/assets/27b8c26c-2dbb-4cbc-a501-c8cb0aaadcb3)
+
 
 ## Visualization
 
@@ -177,4 +179,13 @@ The model tuning process highlighted the progression from basic feature extracti
   - A breakdown of probabilities for each category, visualized through a bar chart built with Recharts.
 
 Here are a few sample images of what our front end looks like:
+
+![Cancer Cell Detection Analysis](https://github.com/user-attachments/assets/4b2555a0-1079-413c-ba8b-dc4ea0f7b128)
+
+![AD_4nXf_M33j3LY3ycbSlXwfN1i1XKopkqqGfsrIcXEKqjZmi25rytWFHeSpa5R2zQnSTluITGLR4NfG8200MGoABMRDBgMRSbEe83M1SvoCUfmNgZMuro7gBLEk](https://github.com/user-attachments/assets/1ba28e70-43d7-44d6-9bda-a99dc7ace8f4)
+
+
+![AD_4nXd3SH__oDKokdo3Guz8Qc4oTh6J9wlery4Cr7rHFmDEVuHfJ-lBsBArudtGQcQBX4B31FwGPXq2o1rqbnvuqWMh44p5_o0qJkK5b_doRP18cW1kFXN5Wa9h](https://github.com/user-attachments/assets/5638b37e-0e91-4293-98cb-3ac169cc959c)
+
+
 
