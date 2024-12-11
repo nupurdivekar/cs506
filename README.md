@@ -188,7 +188,7 @@ Here are a few sample images of what our front end looks like:
 ![AD_4nXd3SH__oDKokdo3Guz8Qc4oTh6J9wlery4Cr7rHFmDEVuHfJ-lBsBArudtGQcQBX4B31FwGPXq2o1rqbnvuqWMh44p5_o0qJkK5b_doRP18cW1kFXN5Wa9h](https://github.com/user-attachments/assets/5638b37e-0e91-4293-98cb-3ac169cc959c)
 
 
-## Overview
+## Installation and running the web interface
 This web application provides an interface for analyzing microscopy images to detect and classify cancer cells. The application uses a TensorFlow model to classify cells into three categories: High, Low, and Stroma. Users can upload and crop images, which are then analyzed by the model.
 
 ## Prerequisites
