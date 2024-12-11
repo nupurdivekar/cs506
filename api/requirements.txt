@@ -1,0 +1,9 @@
+tensorflow
+pillow
+numpy
+fastapi
+uvicorn
+python-multipart
+python-dotenv
+fastapi-cors
+gdown

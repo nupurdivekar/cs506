@@ -1,0 +1,107 @@
+name: CI/CD
+
+on:
+ push:
+   branches: [ main, develop ]
+ pull_request:
+   branches: [ main, develop ]
+
+jobs:
+ ubuntu-build:
+   runs-on: ubuntu-latest
+   strategy:
+     matrix:
+       python-version: ['3.10']
+       node-version: ['18.x']
+   
+   steps:
+   - uses: actions/checkout@v3
+
+   - name: Set up Python ${{ matrix.python-version }}
+     uses: actions/setup-python@v3
+     with:
+       python-version: ${{ matrix.python-version }}
+
+   - name: Set up Node.js ${{ matrix.node-version }}
+     uses: actions/setup-node@v3
+     with:
+       node-version: ${{ matrix.node-version }}
+
+   - name: Cache Python dependencies
+     uses: actions/cache@v3
+     with:
+       path: ~/.cache/pip
+       key: ${{ runner.os }}-pip-${{ hashFiles('api/requirements.txt') }}
+
+   - name: Cache Node.js dependencies
+     uses: actions/cache@v3
+     with:
+       path: ~/.npm
+       key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}
+
+   - name: Install dependencies
+     run: |
+       make setup
+       make install-model
+
+   - name: Backend healthcheck
+     run: |
+       make run & sleep 15
+       curl --max-time 15 http://localhost:8000/api/health || exit 1
+       pkill -f uvicorn
+     shell: bash
+
+   - name: Frontend build
+     run: npm run build
+
+   - name: Upload build artifacts
+     uses: actions/upload-artifact@v3
+     with:
+       name: ubuntu-dist
+       path: dist/
+
+ windows-build:
+   runs-on: windows-latest
+   strategy:
+     matrix:
+       python-version: ['3.10']
+       node-version: ['18.x']
+   
+   steps:
+   - uses: actions/checkout@v3
+
+   - name: Set up Python ${{ matrix.python-version }}
+     uses: actions/setup-python@v3
+     with:
+       python-version: ${{ matrix.python-version }}
+
+   - name: Set up Node.js ${{ matrix.node-version }}
+     uses: actions/setup-node@v3
+     with:
+       node-version: ${{ matrix.node-version }}
+
+   - name: Cache Python dependencies
+     uses: actions/cache@v3
+     with:
+       path: ~/.cache/pip
+       key: ${{ runner.os }}-pip-${{ hashFiles('api/requirements.txt') }}
+
+   - name: Cache Node.js dependencies
+     uses: actions/cache@v3
+     with:
+       path: ~/.npm
+       key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}
+
+   - name: Install dependencies
+     run: |
+       make setup
+       make install-model
+
+   - name: Frontend build
+     run: npm run build
+
+   - name: Upload build artifacts
+     uses: actions/upload-artifact@v3
+     with:
+       name: windows-dist
+       path: dist/
