@@ -236,7 +236,7 @@ make help - Show all available commands
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/Kermit3T/cs506-final-project-front
+git clone https://github.com/nupurdivekar/cs506
 cd your-repo-name
 ```
 
