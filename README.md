@@ -1,201 +1,177 @@
-https://youtu.be/7-hmqENZnfU
+# Final Report
 
-# Midterm Report
+## Dataset: Breast Cancer Grade Dataset from Kaggle
 
-**Preliminary Visualizations of Data**
+### Data Exploration and Feature Understanding
+Before modeling, we performed thorough data exploration:
 
-**Sample Image Grids**
+#### Dataset Structure & Classes
+The dataset includes three categories: High, Low, and Stroma (benign) tissue images. Understanding class definitions was crucial:
+- **High-grade**: More aggressive tumor cells, distinct morphological patterns.
+- **Low-grade**: Less aggressive cells, subtler features.
+- **Stroma**: Non-tumorous tissue or empty regions.
 
-To understand the dataset's structure and appearance, we generated sample image grids for each tissue grade category (High, Low, Stroma). These grids visually display a subset of images, providing a comparative overview of the visual characteristics of each class.
+#### Visual Inspection
+To understand the dataset's structure and appearance, we generated sample image grids for each tissue grade category (High, Low, Stroma). These grids visually display a subset of images, providing a comparative overview of the visual characteristics of each class:
+- **High-grade images** often had darker staining patterns and more irregular cell clusters.
+- **Low-grade images** looked intermediate, sometimes visually similar to both high and stroma.
+- **Stroma images** were lighter and more uniform, often featuring fewer distinct cellular structures.
 
-display_image_grid(TCGA_PATH, categories=\['High', 'Low', 'Stroma'\], n_samples=5)
+#### Dataset Justification
+We decided to use the CHTN folder within the overall dataset since it was a richer data set, with higher quality images and had a greater number of images as well which helped with the training of our model.
 
-**Key Observations**:
-
-- Images across different grades show notable differences in texture, color, and staining, which could help our model distinguish between categories.
-- Visual inspection confirms that images are grouped correctly by grade, and we observed a reasonable diversity within each grade, beneficial for model training.
-
-***RGB Intensity Histograms***
-
-We created RGB intensity histograms for random images in each grade category, highlighting the pixel intensity distributions for each RGB channel (Red, Green, and Blue). This helps in analyzing color patterns and contrasts across the tissue images.
-
-plot_intensity_histograms(TCGA_PATH, categories=\['High', 'Low', 'Stroma'\], n_samples=3)
-
-**Key Observations**:
-
-- The intensity histograms reveal noticeable variations in color intensity between high-grade, low-grade, and stroma tissue. High-grade images tend to show darker or more intense color patterns, which might be indicative of tissue characteristics.
+#### Color Intensity & Distributions
+We created RGB intensity histograms for random images in each grade category, highlighting the pixel intensity distributions for each RGB channel (Red, Green, and Blue). This helps in analyzing color patterns and contrasts across the tissue images. The intensity histograms reveal noticeable variations in color intensity between high-grade, low-grade, and stroma tissue:
+- **High-grade images** tend to show darker or more intense color patterns, which might be indicative of tissue characteristics.
 - These color patterns are critical as they can help the CNN model learn color-based features, potentially improving classification accuracy.
 
-Image Size Distributions
+#### Image Sizes & Preprocessing
+Most images were sufficiently large and of consistent quality. We decided to resize all images to a standard dimension (224x224) to ensure model compatibility. While resizing can lose some detail, this trade-off simplifies training and reduces memory usage.
 
-We examined the distribution of image dimensions (width and height) across categories by plotting histograms for each dimension. This ensures consistency in image size, which is essential for model training.
+### Key Insight from Exploration
+The classes have some distinguishing features (color intensity, structure) that a CNN can learn. However, Low-grade is visually closer to both High and Stroma, suggesting that capturing subtle textural and morphological nuances would be critical.
 
-plot_image_size_distribution(TCGA_PATH, categories=\['High', 'Low', 'Stroma'\])
+---
 
-**Key Observations**:
+## Detailed Description of Data Processing Done So Far
 
-- While images have some variation in size, they mostly fall within a manageable range. This makes it feasible to resize all images uniformly for input into a CNN without significant loss of detail.
+### Data Cleaning and Filtering
+We ensured that each directory contains only valid image files (e.g., `.jpg`, `.png`, `.tif`). Filtering out non-image files helps avoid runtime errors during training and ensures that only relevant data is processed.
 
-These visualizations collectively provide a strong foundation, confirming that the dataset is well-organized and ready for further preprocessing and modeling.
-
-**Detailed Description of Data Processing Done So Far**
-
-To prepare the dataset for effective training, we implemented several data processing steps:
-
-**Data Cleaning and Filtering**
-
-We ensured that each directory contains only valid image files (e.g., .jpg, .png, .tif). Filtering out non-image files helps avoid runtime errors during training and ensures that only relevant data is processed.
-
-**Data Augmentation and Normalization**
-
+### Data Augmentation and Normalization
 Data augmentation techniques were applied to enhance model generalization and prevent overfitting by artificially increasing the dataset's size. Here’s a breakdown of the augmentation techniques used:
-
 - **Rotation Range**: ±20 degrees, which helps capture variations in tissue orientation.
 - **Width and Height Shift**: ±20%, allowing the model to learn from slight shifts in tissue placement.
 - **Horizontal and Vertical Flips**: Simulates real-world variations in tissue images.
-- **Standardization**: All images were resized to 224x224 images for consistency and compatibility with the CNN model
-- **Normalization**: Pixel values were rescaled to fall within the \[0, 1\] range, which aids in faster model convergence and consistency during training.
+- **Standardization**: All images were resized to 224x224 images for consistency and compatibility with the CNN model.
+- **Normalization**: Pixel values were rescaled to fall within the [0, 1] range, which aids in faster model convergence and consistency during training.
 
-**Training and Validation Split**
+### Training and Validation Split
+We set an 80/20 split for training and validation to balance model training and evaluation. This split ensures that the model generalizes well by testing it on an unseen subset.
 
-We set a 70/30 split for training and validation to balance model training and evaluation. This split ensures that the model generalizes well by testing it on an unseen subset.
+---
 
-**Detailed Description of Data Modeling Methods Used So Far**
+## Convolutional Neural Network (CNN) Model Choice
 
-**Convolutional Neural Network (CNN) Model Choice**
+### Initial Attempts: Custom CNN from Scratch
+#### What We Did:
+As outlined in the midterm report, we trained a custom CNN from scratch to classify images into three tissue grades: High, Low, and Stroma, using 30 epochs, a batch size of 32, and TensorFlow’s Functional API. The architecture included three convolutional layers with increasing filters (32, 64, 128), max-pooling layers, a dense layer with 128 neurons, and dropout for overfitting prevention. Early stopping was applied based on validation loss, and the trained model demonstrated effective feature extraction from the dense layer for further classification. Dimensionality reduction techniques (t-SNE, PCA) visualized clear clustering of tissue grades, confirming the model’s ability to capture relevant features. Using these features, a Random Forest Classifier achieved 69.71% accuracy, with high performance for Class 2 (High) but lower precision and recall for Class 1 (Low), indicating overlapping features and the need for improved feature engineering.
 
-We selected a CNN architecture as our primary model due to its strengths in image recognition tasks, such as capturing spatial hierarchies and texture patterns. We are considering either a custom CNN or using transfer learning with a pre-trained network (e.g., VGG, ResNet) if data complexity warrants it.
+#### Rationale:
+Starting from scratch provided full control over the architecture and allowed us to experiment with varying complexity. However, histopathological images are inherently complex, requiring the network to learn low-level (e.g., edges) to high-level (e.g., patterns) features from scratch without any prior knowledge, making this approach challenging.
 
-For our classification task, categorical class labels (High, Low, Stroma) were converted into numerical values using LabelEncoder. This encoding step prepares the labels for input into the model.
+#### Reasoning on Results:
+The lack of pretrained features meant the network had to learn foundational visual concepts in addition to domain-specific patterns. With a relatively small dataset, this proved insufficient to achieve high accuracy. This approach also lacked the generalizable feature representations available in pretrained networks.
 
-The ImageDataGenerator class from TensorFlow’s Keras library is configured to create batches of augmented images for training. This data generator will feed the CNN model during training, helping it learn to identify each category’s unique characteristics under varied conditions.
+## Model Tuning
 
-**Preliminary Data Exploration Results**
+### Attempt 2: VGG16 + Random Forest
 
-Our data exploration has revealed several promising observations:
+#### What We Did
+We utilized the VGG16 architecture, pretrained on ImageNet, as a feature extractor. The top layers were removed, and features from intermediate convolutional layers were flattened and passed to a Random Forest classifier. This approach allowed us to leverage VGG16's proven ability to capture edges, textures, and shapes in a hierarchical manner.
 
-1. **Visual Patterns**: Based on the RGB intensity histograms and sample images, there are clear visual differences between categories. This suggests that our CNN model may effectively learn distinguishing features based on these color and texture variations.
-2. **Data Augmentation**: Preliminary data augmentation tests show that the transformations are visually consistent with real-world variations in histopathological images. This step is expected to boost the model's robustness and ability to generalize.
-3. **Dataset Readiness**: The data preprocessing and organization steps have set up a well-structured dataset, ready for model training with reduced risk of issues like mislabeling or overfitting.
+#### Rationale
+VGG16’s simplicity and effectiveness made it a strong candidate for feature extraction. It has been widely validated for image classification tasks and offered a baseline for understanding the potential of pretrained feature hierarchies on our dataset.
 
-In summary, the data preparation and visualization stages have provided valuable insights and a robust starting point for CNN model training. Our next steps will focus on implementing the CNN architecture, training it on the augmented dataset, and evaluating its performance based on initial accuracy and classification metrics.
+#### Result
+The VGG16 + Random Forest model achieved approximately 69-70% accuracy on the validation set. While the extracted features were moderately effective in separating the classes, the Random Forest classifier’s inability to optimize end-to-end limited its potential.
 
-**Modeling and Results**
+#### Key Takeaway
+This attempt confirmed the value of pretrained feature extraction. However, the model’s accuracy plateaued due to the lack of domain-specific fine-tuning and end-to-end optimization.
 
-**Training Custom CNN from Scratch**
+---
 
-We trained a custom Convolutional Neural Network (CNN) model from scratch using a dataset downloaded from Kaggle, which contains images categorized into three tissue grades: High, Low, and Stroma. The training process involved:
+### Attempt 3: EfficientNetB3 + Random Forest
 
-\- We trained the model for 30 epochs, using a batch size of 32.
+#### What We Did
+We transitioned to EfficientNetB3, a more advanced and modern architecture. EfficientNetB3’s compound scaling (balancing depth, width, and resolution) provided improved feature extraction capabilities. Features extracted from its convolutional layers were used as input to a Random Forest classifier.
 
-\- The model architecture was built using TensorFlow's **Functional API**, consisting of three convolutional layers followed by max-pooling layers. Specifically, the network includes layers with 32, 64, and 128 filters, followed by a **fully connected dense layer** with 128 neurons, and a **dropout layer** with a dropout rate of 0.5 to prevent overfitting.
+#### Rationale
+EfficientNetB3’s architecture is known for its efficiency and effectiveness, making it better suited for capturing subtle histological patterns. It also addressed some of the limitations of VGG16 by offering richer and more relevant features.
 
-\- **Early stopping** was used to prevent overfitting by monitoring the validation loss during training and halting training when performance on the validation set started to decline, thereby ensuring that the model did not over-optimize for the training data.
+#### Result
+The EfficientNetB3 + Random Forest model outperformed the VGG16-based approach, achieving approximately 80% accuracy on the validation set. The increased input size (224x224) and modern architecture allowed for better feature extraction. However, like VGG16, the Random Forest classifier restricted the model’s ability to fully adapt to task-specific nuances.
 
-The trained CNN model was evaluated on the validation set, achieving promising results that indicate its ability to capture important spatial features distinguishing the different tissue types. The model was further used as a feature extractor, where features from the **'dense_1'** layer were extracted for further analysis. These intermediate features help provide a representation of the data that can be further leveraged for classification.
+#### Key Takeaway
+This attempt demonstrated that EfficientNetB3’s advanced feature extraction capabilities offered significant improvements. However, end-to-end fine-tuning was necessary to further boost performance.
 
-**Feature Extraction with Custom CNN**
+---
 
-To better understand the dataset and enhance the performance of the model, we used feature extraction with our trained CNN. We modified the output of our CNN model to capture features from an intermediate layer, which helps in analyzing the quality of the learned features and gaining insights into how well the model is distinguishing between classes. We then used these extracted features for further classification with a Random Forest classifier, which helps evaluate how effective the learned features are for classification tasks beyond the original CNN.
+### Attempt 4: Updated CNN Model
 
-The extracted features were visualized using dimensionality reduction techniques such as t-SNE and **PCA**, providing insights into how the features from different tissue grades cluster in a lower-dimensional space. Both t-SNE and PCA showed notable separation between tissue grades, indicating that the extracted features have captured relevant information that could help the classifier distinguish between different tissue types effectively.
+#### What We Did
+We built a deeper and more advanced CNN from scratch, incorporating techniques such as batch normalization, dropout, and global average pooling. The model consisted of four convolutional blocks, each with multiple Conv2D layers followed by batch normalization and MaxPooling. A GlobalAveragePooling2D layer replaced the traditional Flatten operation to reduce feature dimensions, and a dense head with dropout layers was added for classification.
 
-**t-SNE and PCA Visualization**
+#### Rationale
+This model was designed to address the limitations of the simpler scratch-built CNN by integrating techniques that stabilize training and improve generalization. The addition of batch normalization helped mitigate internal covariate shifts, and dropout reduced the risk of overfitting.
 
-**\- t-SNE** was applied to visualize how well the extracted features cluster based on their respective tissue grades (High, Low, Stroma). The resulting t-SNE plot highlighted clear groupings of the tissue grades, with significant visual separation, particularly between the stroma and other grades. This indicates that our CNN model is capable of extracting meaningful features that can effectively differentiate between the classes, which is an important step in ensuring that subsequent classifiers can achieve high accuracy.
+#### Result
+The current CNN model achieved a validation accuracy of ~82%, with balanced precision, recall, and F1-scores across classes. Regularization techniques such as batch normalization and dropout proved instrumental in improving the model’s robustness. Global average pooling effectively reduced overfitting by minimizing the parameter count in the final layers.
 
-**\- PCA** was used to provide another view of the feature space. The PCA plot similarly displayed a distinct separation between high-grade, low-grade, and stroma tissues, supporting the insights from the t-SNE plot. Both methods reinforce that the model can learn representations that distinguish between categories based on key features. The ability to visualize the data in lower dimensions helps confirm that the features learned by the model are indeed informative and suitable for downstream tasks.
+#### Key Takeaway
+The current CNN model outperformed earlier scratch-built architectures and ensemble models. However, it remained slightly less effective than fine-tuned pretrained models like EfficientNetB3, demonstrating the importance of leveraging pretrained knowledge for complex datasets.
 
-**Random Forest Classification on Extracted Features**
+### Attempt 5: MobileNetV2 + Ensemble
 
-Following feature extraction, a Random Forest Classifier was trained to evaluate the effectiveness of these extracted features. We split the dataset into training and validation sets (80/20 split) and trained the classifier on the extracted features. The classifier achieved an accuracy of 69.71% on the validation set, with the following key metrics:
+What We Did: MobileNetV2 was employed as a feature extractor. Features were flattened and passed to ensemble classifiers, including XGBoost, LightGBM, and CatBoost. A soft voting mechanism averaged the predictions from these classifiers to generate final outputs.  
+Rationale: The ensemble approach aimed to leverage the strengths of different classifiers, each learning diverse decision boundaries. MobileNetV2’s lightweight architecture provided efficient feature extraction.  
+Result: The MobileNetV2 + Ensemble approach achieved ~81% validation accuracy. While it outperformed earlier Random Forest-based methods, it fell short of the fine-tuned EfficientNetB3. This highlighted the importance of end-to-end optimization in tasks requiring nuanced feature adaptation.  
+Key Takeaway: Ensemble models with MobileNetV2 features offered robustness but lacked the adaptability of end-to-end fine-tuning. This experiment reinforced the need for domain-specific refinement in pretrained networks.  
 
-\- **Class 0 (Stroma)**: Precision: **0.74**, Recall: **0.71**, F1-score: **0.72**
+### Summary of Model Tuning
 
-\- **Class 1 (Low)**: Precision: **0.54**, Recall: **0.55**, F1-score: **0.54**
+Through these attempts, we observed that pretrained models like EfficientNetB3 outperformed both scratch-built CNNs and VGG16-based feature extraction. While ensembles provided modest improvements, end-to-end fine-tuning was crucial for achieving state-of-the-art results. Fine-tuning EfficientNetB3 yielded an accuracy of ~86% and balanced performance across all metrics, making it the optimal approach for this task.
 
-\- **Class 2 (High)**: Precision: **0.82**, Recall: **0.88**, F1-score: **0.85**
+### Final Model Description and Justification
 
-The overall classification report suggests that while **Class 2** is well-separated (high recall and precision), **Class 1** has the most overlap with the other classes, resulting in lower metrics for that class. This indicates that more feature engineering may be needed to fully capture the distinct characteristics of Class 1, as it seems to share features with the other tissue types.
+Our final model employs EfficientNetB3, a state-of-the-art convolutional neural network architecture that balances computational efficiency and accuracy. This model was chosen for its ability to generalize well while maintaining computational efficiency, making it suitable for medical image classification tasks.  
 
-**Confusion Matrix Analysis**
+The architecture leverages transfer learning with pre-trained ImageNet weights. The top fully connected layers were removed, and custom layers were added, including a Global Average Pooling (GAP) layer to reduce the feature map dimensions while retaining spatial information, a dense layer with 256 neurons and ReLU activation to learn complex patterns, and two dropout layers with a 50% dropout rate to prevent overfitting. The final output layer consists of three neurons with softmax activation, corresponding to the three classes: "High," "Low," and "Stroma."  
 
-To further understand the model's performance, we plotted a confusion matrix for the classifier on the validation set. The matrix revealed:
+The training process was divided into two phases. Initially, all layers of the EfficientNetB3 backbone were frozen, and only the added layers were trained. This ensured the preservation of the pre-trained weights and allowed the model to adapt to the dataset. A relatively high learning rate of 0.001 was used, and aggressive data augmentation strategies, such as rotation, width/height shifts, zoom, and horizontal flips, were applied to improve generalization. Early stopping and learning rate reduction were employed to avoid overfitting.  
 
-\- **Class 0 (Stroma)** had relatively fewer misclassifications, mostly confused with Class 1, suggesting that the features for Class 0 are fairly distinct, but there are still some shared characteristics with Class 1.
+In the fine-tuning phase, the top 50 layers of the EfficientNetB3 backbone were unfrozen, enabling the model to refine features specific to the dataset. A lower learning rate of 0.0001 was used to ensure stable updates to the pre-trained weights. Callbacks, including ReduceLROnPlateau and EarlyStopping, were used to adjust the learning rate dynamically and halt training when performance plateaued.  
 
-\- **Class 1 (Low)** showed significant misclassification, often mistaken for Class 0 and Class 2. This suggests that the features extracted may not be fully differentiating Class 1 from the others, likely due to similarities in visual texture and patterns that overlap with those of other classes. Improving the model’s ability to distinguish these subtle differences may require further analysis and feature enhancement.
+The final model achieved a validation accuracy of 87%, with strong performance across all evaluation metrics. Precision, recall, and F1-scores were high, reflecting a well-balanced model that minimizes both false positives and false negatives. The confusion matrix showed minimal misclassification, with most "High" and "Low" grade samples being correctly identified and only a small fraction misclassified as "Stroma." These metrics indicate that the model is reliable for medical diagnostics, where accurate classification is critical.  
 
-\- **Class 2 (High)** exhibited high recall with only a few instances being misclassified as Class 1, indicating that the model is able to effectively learn and differentiate the features of high-grade tissues. This strong performance for Class 2 could be attributed to more distinct visual patterns, making it easier for the model to identify.
+EfficientNetB3 was selected as the final model due to its state-of-the-art architecture and ability to generalize effectively. Its compound scaling optimizes depth, width, and resolution, offering a balanced tradeoff between computational efficiency and accuracy. The use of pre-trained weights significantly reduced training time and overfitting risk, especially given the relatively small dataset. The combination of aggressive data augmentation, dropout layers, and selective fine-tuning allowed the model to adapt effectively while maintaining robust performance. This approach ensures the model is reliable and efficient, meeting the rigorous demands of medical image classification tasks.
 
-**Preliminary Conclusions**
+## Comparing Results
 
-\- The feature extraction approach using our trained CNN has successfully captured discriminative features that enable separation between tissue grades. However, the Random Forest classifier results indicate that additional feature engineering or more sophisticated classification models may be necessary to fully capture the distinctions between all classes, particularly for Class 1, which shows considerable overlap with the other grades.
+The two graphs provide a comprehensive comparison of model performance across various architectures. The first graph highlights validation accuracy, showcasing EfficientNetB3 (Fine-Tuned) as the best-performing model with the highest accuracy, followed closely by EfficientNetB3 + Random Forest. Simpler models like VGG16 + Random Forest and Simple CNN fall behind, emphasizing the advantage of using advanced architectures and transfer learning. The second graph delves deeper, comparing precision, recall, and F1-scores across models. Again, EfficientNetB3 (Fine-Tuned) demonstrates a balanced and superior performance in all metrics, indicating its reliability for robust classification tasks. The comparison reinforces the value of state-of-the-art models like EfficientNet in achieving high accuracy and consistent performance across critical evaluation metrics.
 
-\- The confusion matrix and classification metrics highlight that while **Classes 0 and 2** perform reasonably well, further improvements are needed for **Class 1**, perhaps through additional feature extraction or specialized augmentation. Addressing the limitations for Class 1 will be crucial in improving the overall model performance and ensuring that all classes are equally well-represented.
-
-**Next Steps**
-
-\- **Model Refinement**: Train a deeper CNN model, either custom or through transfer learning with a model like **ResNet** or **VGG**, to potentially improve the accuracy for **Class 1**. Using a pre-trained model may allow us to leverage learned features from large datasets, which could be particularly beneficial for capturing the subtle differences between classes.
-
-\- **Hyperparameter Tuning**: Conduct hyperparameter optimization for the Random Forest model or explore using more sophisticated classifiers, such as **Support Vector Machines (SVM** to improve classification performance. Optimizing the parameters could lead to better separation and classification accuracy, especially for the underperforming class.
-
-\- **Additional Augmentation**: Implement additional augmentation strategies focused on **Class 1** to create more diverse and representative samples, reducing overlap and improving model differentiation. This could include transformations that specifically enhance features unique to Class 1, making it easier for the model to distinguish this category from others.
-
-\- **Feature Engineering**: Experiment with different feature extraction methods or apply **Principal Component Analysis (PCA)** to select the most informative features, potentially reducing the overlap between classes. Additionally, applying **wavelet transformations** or **texture analysis** could provide new insights and lead to better classification results.
-
-\- **Ensemble Methods**: Consider using ensemble methods, combining multiple models to leverage their individual strengths and potentially achieve better overall classification performance. An ensemble approach could help mitigate weaknesses observed in single classifiers and improve robustness, especially for difficult-to-classify categories like Class 1.
-
-\- **Deeper Analysis of Misclassifications**: Conduct a more detailed analysis of the misclassified instances, particularly focusing on **Class 1**. By examining these instances visually, we may identify common patterns or characteristics that are confusing the model, which could provide insights into improving feature extraction or data augmentation techniques.
-
-\- **Incorporate Additional Data Sources**: To further enhance the model's ability to distinguish between tissue grades, consider incorporating additional datasets. Using data from multiple sources may increase variability and provide the model with a broader understanding of the tissue types, leading to better generalization.
-
-\- **Fine-Tuning Training Strategies**: Implement more advanced training strategies, such as **learning rate schedules** or **adaptive optimizers** like **AdamW**, to improve model convergence and performance. Adjusting the learning rate dynamically could help the model learn more effectively, particularly for harder-to-classify categories.
-
-\- **Layer-Wise Analysis**: Perform an analysis of different layers of the CNN to understand which features are being learned at various stages of the network. This analysis can help identify if certain features are being underrepresented and guide modifications to the model architecture to enhance learning for those features.
-
-\- **Data Augmentation Visualization**: Extend the augmentation visualization process to include more examples from each class. Visualizing the augmented images for **Class 1** can provide further insight into why it might be challenging to differentiate, and whether the augmentation is effectively creating diverse representations for this class.
-
-\- **Transfer Learning Evaluation**: Experiment with initializing the CNN model using weights from networks pre-trained on medical image datasets, such as **ImageNet** or specific histopathological image collections. This could provide a stronger baseline and enhance the ability of the model to identify subtle features early in the training process.
-
-
-___________________________________________________________________________________________________________________________________________________________________________________
-# Project Proposal: Cancer Detection Using Convolutional Neural Networks (CNNs)
-
-## Description
-This project aims to develop a deep learning-based system for detecting breast cancer and grading it based on histopathological images. By leveraging Convolutional Neural Networks (CNNs), we will focus on classifying images as either low-grade or high-grade cancer, with the goal of providing early detection and diagnostic support to medical professionals.
-
-## Goals
-1. **Accurate Classification**: Successfully classify histopathology images as low-grade, high-grade, or benign tissue.
-2. **Generalization and Scalability**: Ensure the model performs well across images from different sources by training on one subset of images (e.g., low-grade cases) and testing on another (e.g., high-grade cases).
-
-## Data Collection
-We will use the [Breast Cancer Grade Dataset from Kaggle](https://www.kaggle.com/datasets/lesliedalton/breast-cancer-grade). This dataset includes histopathological images of breast cancer tissue, categorized into:
-   - **High Grade**: High-risk cancer cells showing severe abnormalities.
-   - **Low Grade**: Low-risk cancer cells with less aggressive features.
-   - **Benign Tissue (Stroma)**: Non-cancerous tissue sections and empty regions representing normal, non-tumorous areas.
-
-## Modeling Approach
-1. **Preprocessing**: Preprocess images by resizing, normalizing, and augmenting to improve model performance and prevent overfitting. Techniques will include random rotation, horizontal/vertical flips, and color adjustments.
-2. **Model Architecture**: 
-   - Initially, use a pre-trained model (such as VGG16 or ResNet) and fine-tune it for our specific task. 
-   - Later, experiment with custom CNN architectures tailored to the dataset characteristics for optimized performance.
-3. **Cross-Domain Training**: Train on one subset (e.g., low grade) and validate on another (e.g., high grade) to ensure that the model can generalize across different image subsets, emulating real-world scenarios.
+---
 
 ## Visualization
-To understand and interpret the model’s decisions, we will use the following visualization techniques:
-   - **Class Activation Maps (CAMs) or Heatmaps**: Highlight areas where the model focuses on detecting cancer cells.
-   - **t-SNE Plots**: Represent high-dimensional features in a two-dimensional space to visualize clustering of features learned by the model.
-   - **ROC Curves**: Evaluate classification performance, especially for differentiating between low and high-grade cancer tissue.
 
-## Test Plan
-1. **Data Split**: Divide the data into training and testing sets, with 80% for training and 20% for testing, maintaining a balanced class distribution.
-2. **Cross-Validation**: Apply cross-validation to fine-tune hyperparameters, ensuring robustness and minimizing overfitting.
-3. **Generalization Testing**: Train the model on one set (e.g., CHTN) and test on the other (e.g., TCGA), evaluating its performance in a cross-dataset setting. The primary evaluation metric will be the percentage of correctly classified images across all categories (high, low, and stroma).
+The visualization of training and validation accuracy and loss reveals consistent improvement over epochs, with convergence indicating that the model generalizes well without overfitting. The gradual reduction in both training and validation loss highlights effective optimization, although occasional spikes in validation loss suggest sensitivity to specific validation samples. Overall, the plots demonstrate that the model’s learning process was stable and well-tuned.
 
-## Hardware Capabilities
-To handle the computational demands of training on high-resolution histopathological images, we will utilize either **Google Colab** or **Boston University’s Shared Computing Cluster**:
-   - **Google Colab**: Allows us to leverage free GPU/TPU resources for quick prototyping and smaller-scale experiments.
-   - **Boston University’s Shared Computing Cluster**: Provides access to a high-performance computing environment suitable for training on large datasets and conducting extended experiments, especially beneficial for projects that require more computational power.
+The confusion matrix further underscores the model's strengths and challenges. High precision and recall were achieved for the "High" and "Stroma" classes, reflecting the model's ability to distinguish these patterns effectively. However, the "Low" class exhibited some misclassifications, particularly as "High," likely due to overlapping features in histopathological images. This points to the need for enhanced feature extraction or additional training data to improve differentiation.
 
-These resources will enable us to scale our project effectively and manage complex computations, particularly when working with larger image sizes and experimenting with various CNN architectures.
+ROC curves and AUC scores provide a comprehensive view of the model’s performance across all classes. With AUC scores of ~0.98 for "High" and "Stroma" and ~0.95 for "Low," the model demonstrates robust classification capabilities. However, the slightly lower AUC for the "Low" class suggests areas for refinement to better capture subtle variations.
+
+Visualizing the model architecture highlights a well-balanced design with EfficientNetB3 as the backbone. Dropout layers and a dense head mitigate overfitting while maintaining computational efficiency. This architecture strikes a balance between complexity and generalizability, making it effective for this dataset.
+
+The visualization of filters and feature maps provides insights into the model’s learning process. Filters in the first convolutional layer capture basic features like edges and textures, while deeper layers abstract these into more complex patterns. Feature maps from sample images demonstrate the model's ability to focus on relevant regions, confirming its effectiveness in extracting meaningful features from histopathological slides.
+
+Overall, these visualizations and metrics validate the model's robustness and effectiveness in classifying histopathological images. The insights gained from these analyses also highlight areas for future improvement, particularly in enhancing the differentiation of closely related classes like "Low" and "High."
+
+---
+
+## Conclusions
+
+The model tuning process highlighted the progression from basic feature extraction to advanced architectures. VGG16 and EfficientNetB3 with Random Forest achieved 69% and 80% accuracy, respectively, leveraging pretrained features but lacking end-to-end optimization. A scratch-built CNN reached 68% accuracy, limited by data size and pretrained knowledge. The MobileNetV2 ensemble improved to 81%, showcasing robustness but falling short in adaptability. The current CNN model achieved 82% accuracy with balanced metrics, benefiting from modern techniques like batch normalization and dropout. However, the fine-tuned EfficientNetB3 achieved the highest accuracy of 88%, demonstrating the importance of domain-specific fine-tuning for complex datasets like histopathological images.
+
+---
+
+## Displaying the Final Model
+
+- **Interactive Web App**: To simplify the process we made an interacting web application using Vite as a framework to allow users to upload their own image and test it with the model.
+- **Web-side Image Preprocessing**: Since the original images in the data set have a dimension of 1x1 we made a cropping interface that let users select the area of interest on their image and prompt them with a preview before running the image through the model.
+- **Using the Model in the Web App**: To use the model we export it as a Keras file and create an API endpoint using FastAPI so that the user can obtain the model and run the app locally.
+- **Displaying Results**: The end result displayed on the webpage contains the following:
+  - The primary classification (High, Low, or Stroma).
+  - A breakdown of probabilities for each category, visualized through a bar chart built with Recharts.
+
+Here are a few sample images of what our front end looks like:
+
